@@ -1,0 +1,19 @@
+.mypy_cache/
+/.coverage
+/.coverage.*
+/.nox/
+/.python-version
+/.pytype/
+/dist/
+/docs/_build/
+/src/*.egg-info/
+__pycache__/
+
+# PyCharm projects
+.idea/
+
+# MacOS
+.DS_Store
+
+# Local work directory
+hacking/

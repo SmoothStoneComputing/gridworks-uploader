@@ -1,0 +1,251 @@
+name: Tests
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  tests:
+    name: ${{ matrix.session }} ${{ matrix.python }} / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { python: "3.12", os: "ubuntu-latest", session: "pre-commit" }
+          - { python: "3.12", os: "ubuntu-latest", session: "mypy" }
+          - { python: "3.11", os: "ubuntu-latest", session: "mypy" }
+          - { python: "3.11", os: "ubuntu-latest", session: "tests" }
+          - { python: "3.12", os: "ubuntu-latest", session: "tests", coverage: true }
+          # mosuqitto github action only supported on ubuntu
+          # - { python: "3.12", os: "macos-latest", session: "tests" }
+          # - { python: "3.12", os: "windows-latest", session: "tests" }
+          - { python: "3.12", os: "ubuntu-latest", session: "xdoctest" }
+          - { python: "3.12", os: "ubuntu-latest", session: "docs-build" }
+
+    env:
+      NOXSESSION: ${{ matrix.session }}
+      FORCE_COLOR: "1"
+      PRE_COMMIT_COLOR: "always"
+
+    steps:
+      ###############################
+      # Work around pipx issue #1331 with absolute path to constraint.txt
+      # https://github.com/pypa/pipx/issues/1331#issuecomment-2043163012
+      - name: Set PIP_ARGS on Windows
+        run: echo "PIP_ARGS=--constraint=$env:GITHUB_WORKSPACE/.github/workflows/constraints.txt" | Out-File -FilePath $env:GITHUB_ENV -Append
+        if: runner.os == 'Windows'
+
+      - name: Set PIP_ARGS on not-Windows
+        run: echo "PIP_ARGS=--constraint=$GITHUB_WORKSPACE/.github/workflows/constraints.txt" >> "$GITHUB_ENV"
+        if: runner.os != 'Windows'
+      ###############################
+
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v5.2.0
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Upgrade pip
+        run: |
+          pip install ${{ env.PIP_ARGS }} pip
+          pip --version
+
+      - name: Upgrade pip in virtual environments
+        shell: python
+        run: |
+          import os
+          import pip
+
+          with open(os.environ["GITHUB_ENV"], mode="a") as io:
+              print(f"VIRTUALENV_PIP={pip.__version__}", file=io)
+
+      - name: Install gwcert
+        run: |
+          pipx install gridworks-cert
+          gwcert --version
+
+      - name: Generate CA
+        run: |
+          echo Creating CA
+          gwcert ca create --ca-dir ${{ github.workspace }}/tests/.ci-ca ci-test-ca
+          echo "\nCA info:"
+          gwcert ca info --ca-dir ${{ github.workspace }}/tests/.ci-ca
+          echo "\nAdding mosquitto key:"
+          gwcert key add --ca-dir ${{ github.workspace }}/tests/.ci-ca --certs-dir ${{ github.workspace }}/tests/.ci-ca/certs --dns localhost mosquitto
+          echo "\nCA info:"
+          gwcert ca info --ca-dir ${{ github.workspace }}/tests/.ci-ca
+          sudo chmod a+r ${{ github.workspace }}/tests/.ci-ca/certs/mosquitto/private/mosquitto.pem
+          ls -lR ${{ github.workspace }}/tests/.ci-ca
+
+      - name: Start Mosquitto
+        uses: namoshek/mosquitto-github-action@v1.1.0
+        with:
+          ports: "1883:1883 8883:8883"
+          config: ${{ github.workspace }}/tests/config/ci-mosquitto.conf
+          certificates: ${{ github.workspace }}/tests/.ci-ca
+          container-name: "local-mqtt"
+
+      - name: Wait for Mosquitto
+        uses: iFaxity/wait-on-action@v1.2.1
+        with:
+          resource: tcp:localhost:1883
+          timeout: 5000
+
+      # - name: Try Mosquitto Clients
+      #   run: |
+      #     gwcert key add --ca-dir ${{ github.workspace }}/tests/.ci-ca --certs-dir ${{ github.workspace }}/tests/.ci-ca/certs ci
+      #     sudo apt-get install mosquitto-clients
+      #     echo pub clear
+      #     mosquitto_pub -h localhost -p 1883 -t foo -m '{"bla":1}'
+      #     echo sub clear
+      #     mosquitto_sub -h localhost -p 1883 -t foo -E
+      #     echo pub TLS
+      #     mosquitto_pub -h localhost -p 8883 -t foo \
+      #           --cafile ${{ github.workspace }}/tests/.ci-ca/ca.crt \
+      #           --cert ${{ github.workspace }}/tests/.ci-ca/certs/ci/ci.crt \
+      #           --key ${{ github.workspace }}/tests/.ci-ca/certs/ci/private/ci.pem \
+      #           -m '{"bar":1}'
+      #     echo sub TLS
+      #     mosquitto_sub -h localhost -p 8883 -t foo \
+      #           --cafile ${{ github.workspace }}/tests/.ci-ca/ca.crt \
+      #           --cert ${{ github.workspace }}/tests/.ci-ca/certs/ci/ci.crt \
+      #           --key ${{ github.workspace }}/tests/.ci-ca/certs/ci/private/ci.pem \
+      #           -E
+
+      - name: Install Poetry
+        run: |
+          pipx install --pip-args=${{ env.PIP_ARGS }} poetry
+          poetry --version
+
+      - name: Install Nox
+        run: |
+          pipx install --pip-args=${{ env.PIP_ARGS }} nox
+          pipx inject --pip-args=${{ env.PIP_ARGS }} nox nox-poetry
+          nox --version
+
+      - name: Compute pre-commit cache key
+        if: matrix.session == 'pre-commit'
+        id: pre-commit-cache
+        shell: python
+        run: |
+          import hashlib
+          import sys
+
+          python = "py{}.{}".format(*sys.version_info[:2])
+          payload = sys.version.encode() + sys.executable.encode()
+          digest = hashlib.sha256(payload).hexdigest()
+          result = "${{ runner.os }}-{}-{}-pre-commit".format(python, digest[:8])
+
+          print("::set-output name=result::{}".format(result))
+
+      - name: Restore pre-commit cache
+        uses: actions/cache@v4
+        if: matrix.session == 'pre-commit'
+        with:
+          path: ~/.cache/pre-commit
+          key: ${{ steps.pre-commit-cache.outputs.result }}-${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: |
+            ${{ steps.pre-commit-cache.outputs.result }}-
+
+      - name: Run Tests with coverage
+        if: matrix.session == 'tests' && matrix.coverage == true
+        env:
+          GWPROACTOR_TEST_CA_CERT_PATH: ${{ github.workspace }}/tests/.ci-ca/ca.crt
+          GWPROACTOR_TEST_CA_KEY_PATH: ${{ github.workspace }}/tests/.ci-ca/private/ca_key.pem
+        run: |
+          nox --python=${{ matrix.python }}
+
+      - name: Run Tests without coverage
+        if: matrix.session == 'tests' && matrix.coverage != true
+        env:
+          GWPROACTOR_TEST_CA_CERT_PATH: ${{ github.workspace }}/tests/.ci-ca/ca.crt
+          GWPROACTOR_TEST_CA_KEY_PATH: ${{ github.workspace }}/tests/.ci-ca/private/ca_key.pem
+        run: |
+          nox --python=${{ matrix.python }} -- --no-coverage
+
+      - name: Run non-test session
+        if: matrix.session != 'tests'
+        env:
+          GWPROACTOR_TEST_CA_CERT_PATH: ${{ github.workspace }}/tests/.ci-ca/ca.crt
+          GWPROACTOR_TEST_CA_KEY_PATH: ${{ github.workspace }}/tests/.ci-ca/private/ca_key.pem
+        run: |
+          nox --python=${{ matrix.python }}
+
+      - name: Mosquitto Log
+        if: failure()
+        run: |
+          docker logs local-mqtt
+
+      - name: Upload coverage data
+        if: always() && matrix.session == 'tests'
+        uses: "actions/upload-artifact@v4.6.1"
+        with:
+          name: coverage-data
+          path: ".coverage.*"
+
+      - name: Upload documentation
+        if: matrix.session == 'docs-build'
+        uses: actions/upload-artifact@v4.6.1
+        with:
+          name: docs
+          path: docs/_build
+
+  coverage:
+    runs-on: ubuntu-latest
+    needs: tests
+    steps:
+      ###############################
+      # Work around pipx issue #1331 with absolute path to constraint.txt
+      # https://github.com/pypa/pipx/issues/1331#issuecomment-2043163012
+      - name: Set PIP_ARGS on Windows
+        run: echo "PIP_ARGS=--constraint=$env:GITHUB_WORKSPACE/.github/workflows/constraints.txt" | Out-File -FilePath $env:GITHUB_ENV -Append
+        if: runner.os == 'Windows'
+
+      - name: Set PIP_ARGS on not-Windows
+        run: echo "PIP_ARGS=--constraint=$GITHUB_WORKSPACE/.github/workflows/constraints.txt" >> "$GITHUB_ENV"
+        if: runner.os != 'Windows'
+      ###############################
+
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5.2.0
+        with:
+          python-version: "3.12"
+
+      - name: Upgrade pip
+        run: |
+          pip install ${{ env.PIP_ARGS }} pip
+          pip --version
+
+      - name: Install Poetry
+        run: |
+          pipx install --pip-args=${{ env.PIP_ARGS }} poetry
+          poetry --version
+
+      - name: Install Nox
+        run: |
+          pipx install --pip-args=${{ env.PIP_ARGS }} nox
+          pipx inject --pip-args=${{ env.PIP_ARGS }} nox nox-poetry
+          nox --version
+
+      - name: Download coverage data
+        uses: actions/download-artifact@v4.1.9
+        with:
+          name: coverage-data
+
+      - name: Combine coverage data and display human readable report
+        run: |
+          nox --session=coverage
+
+      - name: Create coverage report
+        run: |
+          nox --session=coverage -- xml
+
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v5.4.0
