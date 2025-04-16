@@ -16,6 +16,7 @@ from gwproactor.config import MQTTClient
 from gwproactor.persister import TimedRollingFilePersister
 from gwproto import HardwareLayout
 from gwproto.named_types.web_server_gt import WebServerGt
+from pydantic_settings import SettingsConfigDict
 
 from gwupload.uploader import Uploader
 
@@ -32,6 +33,12 @@ class UploaderSettings(AppSettings):
     ingester: MQTTClient = MQTTClient()
     server: WebServerGt = WebServerGt()
     listener: WebEventListenerSettings = WebEventListenerSettings()
+
+    model_config = SettingsConfigDict(
+        env_prefix="UPLOADER_APP_",
+        env_nested_delimiter="__",
+        nested_model_default_partial_update=True,
+    )
 
 
 class UploaderApp(App):
@@ -97,7 +104,7 @@ class UploaderApp(App):
                 node=self._layout.add_node(
                     node=WebEventListener.default_node(),
                 ),
-                constructor_args=self.settings.listener.model_dump(),
+                constructor_args={"settings": self.settings.listener},
             )
         ]
 
