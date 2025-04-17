@@ -29,7 +29,7 @@ class StubIngesterSettings(AppSettings):
     uploader_short_name: str = DEFAULT_UPLOADER_SHORT_NAME
     uploader: MQTTClient = MQTTClient()
     event_logger_level: int = logging.WARNING
-    event_logger_content_len: int = 50
+    event_logger_content_len: int = 80
 
     model_config = SettingsConfigDict(
         env_prefix="STUB_INGESTER_APP_",
@@ -68,9 +68,8 @@ class StubIngester(PrimeActor):
     def process_mqtt_message(
         self, _: Message[MQTTReceiptPayload], decoded: Message[Any]
     ) -> None:
-        match decoded.Payload:
-            case EventBase():
-                self.log_event(decoded.Payload)
+        if isinstance(decoded.Payload, EventBase):
+            self.log_event(decoded.Payload)
 
 
 class StubIngesterApp(InstrumentedApp):

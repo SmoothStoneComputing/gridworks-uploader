@@ -25,14 +25,15 @@ Changelog = "https://github.com/anschweitzer/gridworks-uploader/releases"
 [tool.poetry.dependencies]
 python = "^3.11"
 # gridworks-protocol = "^1.2.4"
-gridworks-protocol = { git = "https://github.com/thegridelectric/gridworks-protocol.git", branch = "as/sharing" }
-# gridworks-protocol = { path = "../gridworks-protocol", develop = true }
+# gridworks-protocol = { git = "https://github.com/thegridelectric/gridworks-protocol.git", branch = "as/sharing" }
+gridworks-protocol = { path = "../gridworks-protocol", develop = true }
 # gridworks-proactor = {extras = ["tests"], version = "^1.1.11"}
-gridworks-proactor = {extras = ["tests"], git = "https://github.com/SmoothStoneComputing/gridworks-proactor.git", branch = "2.X/has-a"}
-# gridworks-proactor = {extras = ["tests"], path = "../gridworks-proactor", develop = true}
+# gridworks-proactor = {extras = ["tests"], git = "https://github.com/SmoothStoneComputing/gridworks-proactor.git", branch = "2.X/has-a"}
+gridworks-proactor = {extras = ["tests"], path = "../gridworks-proactor", develop = true}
 pydantic = "^2.11.2"
 pydantic-settings = "^2.8.1"
 typer = "^0.15.2"
+httpx = "^0.28.1"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -159,7 +160,7 @@ ignore = [
     "PT011", # It's not practical to match strings in exceptions caught by pytest.raises()
     "S101", # asserts allowed in tests...
 ]
-"src/gwproactor_test/**/*.py" = [
+"src/gwupload/stubs/**/*.py" = [
     "ARG001",
     "C901", # Complexity
     "FBT",
@@ -170,4 +171,5 @@ ignore = [
     "PLR0915",
     "PT011",
     "S101",
+    "S311",
 ]

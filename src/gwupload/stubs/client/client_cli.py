@@ -1,8 +1,11 @@
+import random
+import time
+
 import httpx
 import rich
 import typer
 
-from gwupload.stubs.client.client import upload_packet
+from gwupload.stubs.client.client import SomeData
 
 app = typer.Typer(
     no_args_is_help=True,
@@ -16,19 +19,18 @@ app = typer.Typer(
 def run(
     *,
     num_packets: int = 1,
-    readings_per_packet: int = 2,
-    sensor_name: str = "dark-massometer",
-    unit: str = "kg",
 ) -> None:
     """Generate and upload random data to local Gridworks Uploader"""
 
     for packet_idx in range(num_packets):
-        response = upload_packet(
-            readings_per_packet=readings_per_packet,
-            sensor_name=sensor_name,
-            unit=unit,
+        response = httpx.post(
+            "http://127.0.0.1:8080/events",
+            json=SomeData(
+                TimestampUTC=round(time.time(), 3),
+                Reading=round(random.random(), 3),
+            ).model_dump(),
         )
-        rich.print(f"Packet {packet_idx + 1} / {num_packets}")
+        rich.print(f"Packet {packet_idx + 1} / {num_packets}: {response.status_code}")
         # noinspection PyProtectedMember
         httpx._main.print_response(response)  # noqa: SLF001
 
