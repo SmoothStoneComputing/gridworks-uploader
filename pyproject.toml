@@ -21,13 +21,15 @@ gwup = "gwupload.cli:cli_app"
 [tool.poetry.urls]
 Changelog = "https://github.com/anschweitzer/gridworks-uploader/releases"
 
+
 [tool.poetry.dependencies]
 python = "^3.11"
 # gridworks-protocol = "^1.2.4"
-# gridworks-protocol = { path = "../gridworks-protocol", develop = true }
 gridworks-protocol = { git = "https://github.com/thegridelectric/gridworks-protocol.git", branch = "as/sharing" }
-# gridworks-proactor = { path = "../gridworks-proactor", develop = true }
-gridworks-proactor = { git = "https://github.com/SmoothStoneComputing/gridworks-proactor.git", branch = "2.X/has-a" }
+# gridworks-protocol = { path = "../gridworks-protocol", develop = true }
+# gridworks-proactor = {extras = ["tests"], version = "^1.1.11"}
+gridworks-proactor = {extras = ["tests"], git = "https://github.com/SmoothStoneComputing/gridworks-proactor.git", branch = "2.X/has-a"}
+# gridworks-proactor = {extras = ["tests"], path = "../gridworks-proactor", develop = true}
 pydantic = "^2.11.2"
 pydantic-settings = "^2.8.1"
 typer = "^0.15.2"
@@ -112,6 +114,7 @@ exclude = [
 output-format = "concise"
 fix = true
 show-fixes = true
+target-version = "py312"
 
 [tool.ruff.lint]
 preview = true
@@ -119,8 +122,6 @@ explicit-preview-rules = true
 # default select used by  ruff: ["E4", "E7", "E9", "F"]
 select = ["ALL"]
 ignore = [
-    "ANN101", # Deprecated
-    "ANN102", # Deprecated
     "ANN401", # When we use 'Any' we mean it.
     "B027",
     "COM812",

@@ -18,8 +18,6 @@ from gwproto import HardwareLayout
 from gwproto.named_types.web_server_gt import WebServerGt
 from pydantic_settings import SettingsConfigDict
 
-from gwupload.uploader import Uploader
-
 DEFAULT_UPLOADER_SHORT_NAME: str = "u"
 DEFAULT_UPLOADER_PATHS_NAME = "uploader"
 DEFAULT_INGESTER_SHORT_NAME: str = "i"
@@ -36,13 +34,11 @@ class UploaderSettings(AppSettings):
 
     model_config = SettingsConfigDict(
         env_prefix="UPLOADER_APP_",
-        env_nested_delimiter="__",
-        nested_model_default_partial_update=True,
     )
 
 
 class UploaderApp(App):
-    INGESTER_LINK: str = Uploader.INGESTER_LINK
+    INGESTER_LINK: str = "ingester"
 
     @classmethod
     def app_settings_type(cls) -> type[UploaderSettings]:
@@ -50,7 +46,7 @@ class UploaderApp(App):
 
     @property
     def settings(self) -> UploaderSettings:
-        return typing.cast(UploaderSettings, self._settings)
+        return typing.cast("UploaderSettings", self._settings)
 
     @classmethod
     def paths_name(cls) -> str:
