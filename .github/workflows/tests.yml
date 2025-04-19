@@ -158,6 +158,9 @@ jobs:
           GWPROACTOR_TEST_CA_KEY_PATH: ${{ github.workspace }}/tests/.ci-ca/private/ca_key.pem
         run: |
           nox --python=${{ matrix.python }}
+          pwd
+          ls -a
+          find . -name ".coverage*"
 
       - name: Run Tests without coverage
         if: matrix.session == 'tests' && matrix.coverage != true
@@ -174,9 +177,6 @@ jobs:
           GWPROACTOR_TEST_CA_KEY_PATH: ${{ github.workspace }}/tests/.ci-ca/private/ca_key.pem
         run: |
           nox --python=${{ matrix.python }}
-          pwd
-          ls -a
-          find . -name ".coverage*"
 
       - name: Mosquitto Log
         if: failure()
