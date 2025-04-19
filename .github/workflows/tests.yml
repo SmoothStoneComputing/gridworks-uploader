@@ -158,9 +158,6 @@ jobs:
           GWPROACTOR_TEST_CA_KEY_PATH: ${{ github.workspace }}/tests/.ci-ca/private/ca_key.pem
         run: |
           nox --python=${{ matrix.python }}
-          pwd
-          ls -a
-          find . -name ".coverage*"
 
       - name: Run Tests without coverage
         if: matrix.session == 'tests' && matrix.coverage != true
@@ -182,15 +179,6 @@ jobs:
         if: failure()
         run: |
           docker logs local-mqtt
-
-      - name: Where is coverage?
-        run: |
-          echo pwd: [`pwd`]
-          echo ls
-          ls -a
-          echo find
-          find . -name ".coverage*"
-          
 
       - name: Upload coverage data
         if: always() && matrix.session == 'tests' && matrix.coverage == true
