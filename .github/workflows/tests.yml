@@ -183,12 +183,23 @@ jobs:
         run: |
           docker logs local-mqtt
 
+      - name: Where is coverage?
+        run: |
+          echo pwd: [`pwd`]
+          echo ls
+          ls -a
+          echo find
+          find . -name ".coverage*"
+          
+
       - name: Upload coverage data
-        if: always() && matrix.session == 'tests'
+        if: always() && matrix.session == 'tests' && matrix.coverage == true
         uses: "actions/upload-artifact@v4.6.2"
         with:
           name: coverage-data
           path: ".coverage.*"
+          if-no-files-found: error
+          include-hidden-files: true
 
       - name: Upload documentation
         if: matrix.session == 'docs-build'
