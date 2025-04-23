@@ -783,61 +783,53 @@ xdg = ">=6.0.0"
 
 [[package]]
 name = "gridworks-proactor"
-version = "2.0.0.dev1"
+version = "2.0.0"
 description = "Gridworks Proactor"
 optional = false
-python-versions = "^3.11"
-files = []
-develop = false
+python-versions = "<4.0,>=3.11"
+files = [
+    {file = "gridworks_proactor-2.0.0-py3-none-any.whl", hash = "sha256:cdec72f8921991149d49ed60caa2e287d168d4947008250fb822209e94b6735f"},
+    {file = "gridworks_proactor-2.0.0.tar.gz", hash = "sha256:46753de581a6d3d84a3b30bf57873f6304b475579635c862d6fda328e4729b69"},
+]
 
 [package.dependencies]
-aiohttp = "^3.11.11"
-freezegun = {version = "^1.5.1", optional = true}
-gridworks-cert = {version = ">=0.4.2", optional = true}
-gridworks-protocol = {git = "https://github.com/thegridelectric/gridworks-protocol.git", branch = "as/sharing"}
-multidict = "^6.0.4"
-paho-mqtt = "^1.6.1"
-pydantic = "^2.8.2"
-pydantic-settings = "^2.4.0"
-pytest = {version = ">=7.2.0", optional = true}
-pytest-asyncio = {version = ">=0.20.3", optional = true}
-python-dotenv = "^1.0.0"
-result = "^0.9.0"
-rich = "^14.0.0"
-typer = {version = "^0.15.2", optional = true}
-xdg = "^6.0.0"
-yarl = "^1.9.2"
+aiohttp = ">=3.11.11,<4.0.0"
+freezegun = {version = ">=1.5.1,<2.0.0", optional = true, markers = "extra == \"tests\""}
+gridworks-cert = {version = ">=0.4.2", optional = true, markers = "extra == \"tests\""}
+gridworks-protocol = ">=1.2.5,<2.0.0"
+multidict = ">=6.0.4,<7.0.0"
+paho-mqtt = ">=1.6.1,<2.0.0"
+pydantic = ">=2.8.2,<3.0.0"
+pydantic-settings = ">=2.4.0,<3.0.0"
+pytest = {version = ">=7.2.0", optional = true, markers = "extra == \"tests\""}
+pytest-asyncio = {version = ">=0.20.3", optional = true, markers = "extra == \"tests\""}
+python-dotenv = ">=1.0.0,<2.0.0"
+result = ">=0.9.0,<0.10.0"
+rich = ">=14.0.0,<15.0.0"
+typer = {version = ">=0.15.2,<0.16.0", optional = true, markers = "extra == \"tests\""}
+xdg = ">=6.0.0,<7.0.0"
+yarl = ">=1.9.2,<2.0.0"
 
 [package.extras]
 tests = ["freezegun (>=1.5.1,<2.0.0)", "gridworks-cert (>=0.4.2)", "pytest (>=7.2.0)", "pytest-asyncio (>=0.20.3)", "typer (>=0.15.2,<0.16.0)"]
 
-[package.source]
-type = "git"
-url = "https://github.com/SmoothStoneComputing/gridworks-proactor.git"
-reference = "2.X/has-a"
-resolved_reference = "2b4f8b59f762bb0c51bb4bd8126c7b931afef969"
-
 [[package]]
 name = "gridworks-protocol"
-version = "1.2.4"
+version = "1.2.5"
 description = "Gridworks Protocol"
 optional = false
-python-versions = "^3.11"
-files = []
-develop = false
+python-versions = "<4.0,>=3.11"
+files = [
+    {file = "gridworks_protocol-1.2.5-py3-none-any.whl", hash = "sha256:16b8ef1834bce535782f43894fe27c3bbd6b858b0a77db3fc3e37ac4e0c11268"},
+    {file = "gridworks_protocol-1.2.5.tar.gz", hash = "sha256:9ba560b1e69aaed07e1b8d89dd32755f6906940d575a1fa4094805dff74031d4"},
+]
 
 [package.dependencies]
-gridworks = "^1.2.0"
-pydantic = "^2.8.2"
-pydantic-extra-types = "^2.9.0"
-pytz = "^2024.1"
-yarl = "^1.9.2"
-
-[package.source]
-type = "git"
-url = "https://github.com/thegridelectric/gridworks-protocol.git"
-reference = "as/sharing"
-resolved_reference = "005506a7d39b4bb14835f88b989fec7319345271"
+gridworks = ">=1.2.0,<2.0.0"
+pydantic = ">=2.8.2,<3.0.0"
+pydantic-extra-types = ">=2.9.0,<3.0.0"
+pytz = ">=2024.1,<2025.0"
+yarl = ">=1.9.2,<2.0.0"
 
 [[package]]
 name = "h11"
@@ -2807,4 +2799,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "30f1fa12cee8e6ffac5e90107cd1c554b1b807c9bea82704575d87d6c216358c"
+content-hash = "349edc88153fed13947f525ca42a401c8b232e166810831e46a3c0a4ae12ff20"
