@@ -6,14 +6,13 @@ from logging import Logger, LoggerAdapter
 from pathlib import Path
 from typing import Any, Optional
 
-from gwproactor import AppSettings, ServicesInterface
+from gwproactor import App, AppSettings, ServicesInterface
 from gwproactor.actors.actor import PrimeActor
 from gwproactor.config import MQTTClient
 from gwproactor.config.links import LinkSettings
 from gwproactor.config.proactor_config import ProactorName
 from gwproactor.message import MQTTReceiptPayload
 from gwproactor.persister import PersisterInterface, SimpleDirectoryWriter
-from gwproactor_test.instrumented_app import InstrumentedApp
 from gwproto import HardwareLayout, Message
 from gwproto.messages import EventBase
 from pydantic_settings import SettingsConfigDict
@@ -72,7 +71,7 @@ class StubIngester(PrimeActor):
             self.log_event(decoded.Payload)
 
 
-class StubIngesterApp(InstrumentedApp):
+class StubIngesterApp(App):
     UPLOADER_LINK: str = "uploader"
 
     @classmethod
