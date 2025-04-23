@@ -12,7 +12,7 @@ packages = [
     { include = "gwupload", from = "src" },
 ]
 classifiers = [
-    "Development Status :: 1 - Planning",
+    "Development Status :: 4 - Beta",
 ]
 
 [tool.poetry.scripts]
