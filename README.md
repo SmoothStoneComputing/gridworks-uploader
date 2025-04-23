@@ -15,7 +15,7 @@
 [status]: https://pypi.org/project/gridworks-uploader/
 [python version]: https://pypi.org/project/gridworks-uploader
 [read the docs]: https://gridworks-uploader.readthedocs.io/
-[tests]: https://github.com/anschweitzer/gridworks-uploader/actions?workflow=Tests
+[tests]: https://github.com/SmoothStoneComputing/gridworks-uploader/actions?workflow=Tests
 [codecov]: https://app.codecov.io/gh/anschweitzer/gridworks-uploader
 [pre-commit]: https://github.com/pre-commit/pre-commit
 
