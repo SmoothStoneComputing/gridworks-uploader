@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/pypi/l/gridworks-uploader)][license]
 
 [![Read the documentation at https://gridworks-uploader.readthedocs.io/](https://img.shields.io/readthedocs/gridworks-uploader/latest.svg?label=Read%20the%20Docs)][read the docs]
-[![Tests](https://github.com/anschweitzer/gridworks-uploader/workflows/Tests/badge.svg)][tests]
+[![Tests](https://github.com/SmoothStoneComputing/gridworks-uploader/workflows/Tests/badge.svg)][tests]
 [![Codecov](https://codecov.io/gh/SmoothStoneComputing/gridworks-uploader/branch/main/graph/badge.svg)][codecov]
 
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)][pre-commit]

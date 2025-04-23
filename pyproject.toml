@@ -5,8 +5,8 @@ description = "Gridworks Uploader"
 authors = ["Andrew Schweitzer <schweitz72@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/anschweitzer/gridworks-uploader"
-repository = "https://github.com/anschweitzer/gridworks-uploader"
+homepage = "https://github.com/SmoothStoneComputing/gridworks-uploader"
+repository = "https://github.com/SmoothStoneComputing/gridworks-uploader"
 documentation = "https://gridworks-uploader.readthedocs.io"
 packages = [
     { include = "gwupload", from = "src" },
@@ -19,7 +19,7 @@ classifiers = [
 gwup = "gwupload.cli:cli_app"
 
 [tool.poetry.urls]
-Changelog = "https://github.com/anschweitzer/gridworks-uploader/releases"
+Changelog = "https://github.com/SmoothStoneComputing/gridworks-uploader/releases"
 
 
 [tool.poetry.dependencies]
