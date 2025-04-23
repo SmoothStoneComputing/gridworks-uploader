@@ -1,81 +1,109 @@
+import typing
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Optional
 
-from gwproactor import App, LinkSettings, ProactorName, ProactorSettings
+from gwproactor import (
+    App,
+    AppSettings,
+    LinkSettings,
+    Proactor,
+    ProactorName,
+    WebEventListener,
+)
+from gwproactor.actors.web_event_listener import WebEventListenerSettings
+from gwproactor.app import ActorConfig
 from gwproactor.config import MQTTClient
 from gwproactor.persister import TimedRollingFilePersister
 from gwproto import HardwareLayout
-from pydantic_settings import BaseSettings
+from gwproto.named_types.web_server_gt import WebServerGt
+from pydantic_settings import SettingsConfigDict
 
-from gwupload.uploader import Uploader
+DEFAULT_UPLOADER_SHORT_NAME: str = "u"
+DEFAULT_UPLOADER_PATHS_NAME = "uploader"
+DEFAULT_INGESTER_SHORT_NAME: str = "i"
 
 
-class UploaderSettings(BaseSettings):
-    paths_name: str = ""
+class UploaderSettings(AppSettings):
+    long_name: str = ""
+    short_name: str = DEFAULT_UPLOADER_SHORT_NAME
     ingester_long_name: str = ""
-    ingester_short_name: str = ""
+    ingester_short_name: str = DEFAULT_INGESTER_SHORT_NAME
+    ingester: MQTTClient = MQTTClient()
+    server: WebServerGt = WebServerGt()
+    listener: WebEventListenerSettings = WebEventListenerSettings()
+
+    model_config = SettingsConfigDict(
+        env_prefix="UPLOADER_APP_",
+    )
 
 
 class UploaderApp(App):
-    INGESTER_LINK: str = Uploader.INGESTER_LINK
-    LISTENER_LINK: str = Uploader.LISTENER_LINK
-    UPLOAD_SRC_LONG_NAME: str = "upload_src"
-    UPLOAD_SRC_SHORT_NAME: str = "usrc"
+    INGESTER_LINK: str = "ingester"
 
-    app_settings: UploaderSettings
+    @classmethod
+    def app_settings_type(cls) -> type[UploaderSettings]:
+        return UploaderSettings
 
-    def __init__(
-        self,
-        app_settings: Optional[UploaderSettings] = None,
-        env_file: Optional[str | Path] = None,
-        **kwargs: Any,
-    ) -> None:
-        self.app_settings = (
-            UploaderSettings(_env_file=env_file)  # noqa
-            if app_settings is None
-            else app_settings
+    @property
+    def settings(self) -> UploaderSettings:
+        return typing.cast("UploaderSettings", self._settings)
+
+    @classmethod
+    def paths_name(cls) -> str:
+        return DEFAULT_UPLOADER_PATHS_NAME
+
+    def _load_hardware_layout(self, layout_path: str | Path) -> HardwareLayout:  # noqa: ARG002
+        return HardwareLayout(
+            layout={},
+            cacs={},
+            components={},
+            nodes={},
+            data_channels={},
+            synth_channels={},
         )
-        kwargs["paths_name"] = self.app_settings.paths_name
-        kwargs["prime_actor_type"] = Uploader
-        super().__init__(**kwargs)
 
-    def _get_name(self, layout: HardwareLayout) -> ProactorName:
+    def _get_name(self, layout: HardwareLayout) -> ProactorName:  # noqa: ARG002
         return ProactorName(
-            long_name=layout.scada_g_node_alias,
-            short_name="s",
+            long_name=self.settings.long_name,
+            short_name=self.settings.short_name,
         )
-
-    def _get_mqtt_broker_settings(
-        self,
-        name: ProactorName,  # noqa: ARG002
-        layout: HardwareLayout,  # noqa: ARG002
-    ) -> dict[str, MQTTClient]:
-        return {
-            link_name: MQTTClient()
-            for link_name in [self.INGESTER_LINK, self.LISTENER_LINK]
-        }
 
     def _get_link_settings(
         self,
         name: ProactorName,  # noqa: ARG002
-        layout: HardwareLayout,
+        layout: HardwareLayout,  # noqa: ARG002
         brokers: dict[str, MQTTClient],  # noqa: ARG002
     ) -> dict[str, LinkSettings]:
         return {
             self.INGESTER_LINK: LinkSettings(
                 broker_name=self.INGESTER_LINK,
-                peer_long_name=layout.atn_g_node_alias,
-                peer_short_name="i",
+                peer_long_name=self.settings.ingester_long_name,
+                peer_short_name=self.settings.ingester_short_name,
                 upstream=True,
-            ),
-            self.LISTENER_LINK: LinkSettings(
-                broker_name=self.LISTENER_LINK,
-                peer_long_name=self.UPLOAD_SRC_LONG_NAME,
-                peer_short_name=self.UPLOAD_SRC_SHORT_NAME,
-                link_subscription_short_name=layout.scada_g_node_alias,
             ),
         }
 
+    def _instantiate_proactor(self) -> Proactor:
+        proactor = super()._instantiate_proactor()
+        proactor.add_web_server_config(
+            name=self.settings.server.Name,
+            host=self.settings.server.Host,
+            port=self.settings.server.Port,
+            enabled=self.settings.server.Enabled,
+            server_kwargs=self.settings.server.Kwargs,
+        )
+        return proactor
+
+    def _get_actor_nodes(self) -> Sequence[ActorConfig]:
+        return [
+            ActorConfig(
+                node=self._layout.add_node(
+                    node=WebEventListener.default_node(),
+                ),
+                constructor_args={"settings": self.settings.listener},
+            )
+        ]
+
     @classmethod
-    def _make_persister(cls, settings: ProactorSettings) -> TimedRollingFilePersister:
+    def _make_persister(cls, settings: AppSettings) -> TimedRollingFilePersister:
         return TimedRollingFilePersister(settings.paths.event_dir)
