@@ -24,7 +24,7 @@ Changelog = "https://github.com/SmoothStoneComputing/gridworks-uploader/releases
 
 [tool.poetry.dependencies]
 python = "^3.11"
-gridworks-protocol = "^1.2.5"
+gridworks-protocol = "^1.2.6"
 # gridworks-protocol = { git = "https://github.com/thegridelectric/gridworks-protocol.git", branch = "dev" }
 # gridworks-protocol = { path = "../gridworks-protocol", develop = true }
 gridworks-proactor = {extras = ["tests"], version = "^2.0.0"}
