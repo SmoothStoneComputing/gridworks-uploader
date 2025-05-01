@@ -97,7 +97,7 @@ class UploaderApp(App):
     def _get_actor_nodes(self) -> Sequence[ActorConfig]:
         return [
             ActorConfig(
-                node=self._layout.add_node(
+                node=self.hardware_layout.add_node(
                     node=WebEventListener.default_node(),
                 ),
                 constructor_args={"settings": self.settings.listener},
