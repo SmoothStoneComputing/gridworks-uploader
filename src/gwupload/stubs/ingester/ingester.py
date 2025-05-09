@@ -6,7 +6,7 @@ from logging import Logger, LoggerAdapter
 from pathlib import Path
 from typing import Any, Optional
 
-from gwproactor import App, AppSettings, ServicesInterface
+from gwproactor import App, AppInterface, AppSettings
 from gwproactor.actors.actor import PrimeActor
 from gwproactor.config import MQTTClient
 from gwproactor.config.links import LinkSettings
@@ -39,7 +39,7 @@ class StubIngester(PrimeActor):
     EVENT_LOGGER_NAME: str = "events"
     event_logger: Logger | LoggerAdapter[Logger]
 
-    def __init__(self, name: str, services: ServicesInterface) -> None:
+    def __init__(self, name: str, services: AppInterface) -> None:
         super().__init__(name, services)
         self.event_logger = self.services.logger.add_category_logger(
             category=self.EVENT_LOGGER_NAME,

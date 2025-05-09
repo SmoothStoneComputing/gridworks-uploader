@@ -141,7 +141,7 @@ def mypy(session: Session) -> None:
         "docs/conf.py",
     ]
     session.install(".")
-    session.install("mypy", "pytest", "types-paho-mqtt")
+    session.install("mypy", "pytest")
     session.run("mypy", "--version")
     session.run("mypy", *args)
     if not session.posargs:

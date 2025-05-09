@@ -67,10 +67,10 @@ cd gridworks-uploader
 Create a `.env` file in the base direcory of the repo with the contents:  
 
 ```
-UPLOADER_APP_lONG_NAME = "test-uploader"
-UPLOADER_APP_INGESTER_LONG_NAME = "test-ingester"
-STUB_INGESTER_APP_lONG_NAME = "test-ingester"
-STUB_INGESTER_APP_UPLOADER_LONG_NAME = "test-uploader"
+UPLOADER_APP_lONG_NAME = "test.uploader"
+UPLOADER_APP_INGESTER_LONG_NAME = "test.ingester"
+STUB_INGESTER_APP_lONG_NAME = "test.ingester"
+STUB_INGESTER_APP_UPLOADER_LONG_NAME = "test.uploader"
 ```
 
 Then run these commands 
