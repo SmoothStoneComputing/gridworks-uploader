@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gridworks-uploader"
-version = "0.1.5"
+version = "0.1.6"
 description = "Gridworks Uploader"
 authors = ["Andrew Schweitzer <schweitz72@gmail.com>"]
 license = "MIT"
@@ -27,7 +27,7 @@ python = "^3.11"
 gridworks-protocol = "^1.2.6"
 # gridworks-protocol = { git = "https://github.com/thegridelectric/gridworks-protocol.git", branch = "dev" }
 # gridworks-protocol = { path = "../gridworks-protocol", develop = true }
-gridworks-proactor = {extras = ["tests"], version = "^3.0.0"}
+gridworks-proactor = {extras = ["tests"], version = "^3.0.2"}
 # gridworks-proactor = {extras = ["tests"], git = "https://github.com/SmoothStoneComputing/gridworks-proactor.git", branch = "dev"}
 # gridworks-proactor = {extras = ["tests"], path = "../gridworks-proactor", develop = true}
 pydantic = "^2.11.2"
