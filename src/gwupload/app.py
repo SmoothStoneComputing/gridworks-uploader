@@ -13,6 +13,7 @@ from gwproactor import (
 from gwproactor.actors.web_event_listener import WebEventListenerSettings
 from gwproactor.app import ActorConfig
 from gwproactor.config import MQTTClient
+from gwproactor.external_watchdog import SystemDWatchdogCommandBuilder
 from gwproactor.persister import TimedRollingFilePersister
 from gwproto import HardwareLayout
 from gwproto.named_types.web_server_gt import WebServerGt
@@ -106,4 +107,9 @@ class UploaderApp(App):
 
     @classmethod
     def _make_persister(cls, settings: AppSettings) -> TimedRollingFilePersister:
-        return TimedRollingFilePersister(settings.paths.event_dir)
+        return TimedRollingFilePersister(
+            settings.paths.event_dir,
+            pat_watchdog_args=SystemDWatchdogCommandBuilder.pat_args(
+                str(settings.paths.name)
+            ),
+        )

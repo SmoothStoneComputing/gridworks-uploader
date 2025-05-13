@@ -6,7 +6,7 @@ from gwproactor.command_line_utils import run_async_main
 from gwproactor.logging_setup import enable_aiohttp_logging
 from gwproactor_test.certs import generate_dummy_certs
 
-from gwupload import UploaderApp
+from gwupload import UploaderApp, service_cli
 from gwupload.stubs import stubs_cli
 
 cli_app = typer.Typer(
@@ -17,6 +17,9 @@ cli_app = typer.Typer(
 )
 
 cli_app.add_typer(stubs_cli.app, name="stubs", help="Use stub applications for testing")
+cli_app.add_typer(
+    service_cli.app, name="service", help="Interact with systemd service for Uploader."
+)
 
 
 @cli_app.command()
