@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gridworks-uploader"
-version = "0.1.7"
+version = "0.1.8"
 description = "Gridworks Uploader"
 authors = ["Andrew Schweitzer <schweitz72@gmail.com>"]
 license = "MIT"
@@ -34,6 +34,11 @@ pydantic = "^2.11.2"
 pydantic-settings = "^2.8.1"
 typer = "^0.15.2"
 httpx = "^0.28.1"
+# TODO: remove when typer adjusts to new click version:
+#   https://github.com/fastapi/typer/discussions/1215
+#   https://github.com/fastapi/typer/pull/1222
+#   https://github.com/fastapi/typer/commits/click-8.2/
+click = "<8.2.0"
 
 
 [tool.poetry.group.dev.dependencies]
