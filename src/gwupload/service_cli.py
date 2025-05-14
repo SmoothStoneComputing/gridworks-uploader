@@ -253,7 +253,7 @@ def status(*, dry_run: bool = False) -> None:
         command="status",
         args=["--no-pager", "-n", "0"],
         sudo_required=False,
-    ).run(dry_run=dry_run)
+    ).run(dry_run=dry_run, raise_on_error=False)
 
 
 @app.command()
@@ -305,12 +305,15 @@ def uninstall(*, env_file: str = ".env", dry_run: bool = False) -> None:
 @app.command()
 def install(*, env_file: str = ".env", dry_run: bool = False) -> None:
     """Install the systemd service"""
+    logger.info("Ensuring a clean environment by uninstalling prior to installing:")
     _uninstall(env_file=env_file, dry_run=dry_run)
+    logger.info("Installing:")
     unit_paths = UnitFilePaths(env_file=env_file)
     unit_paths.add_sym_link_command().run(dry_run=dry_run)
     SystemCtlCommand(command="enable", unit_name=str(unit_paths.dst_unit_file)).run(
         dry_run=dry_run
     )
+    logger.info("Starting service:")
     SystemCtlCommand(command="start").run(dry_run=dry_run)
 
 
