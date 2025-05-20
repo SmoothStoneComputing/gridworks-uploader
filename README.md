@@ -64,8 +64,12 @@ uv tool install -p 3.12 poetry=1.8.5
 git clone https://github.com/SmoothStoneComputing/gridworks-uploader.git
 cd gridworks-uploader
 ```
-Create a `.env` file in the base direcory of the repo with the contents:  
+Create a `.env` file at the location returned by: 
+```shell
+gwup envfile
+```
 
+with these contents:
 ```
 UPLOADER_APP_lONG_NAME = "test.uploader"
 UPLOADER_APP_INGESTER_LONG_NAME = "test.ingester"
@@ -73,28 +77,41 @@ STUB_INGESTER_APP_lONG_NAME = "test.ingester"
 STUB_INGESTER_APP_UPLOADER_LONG_NAME = "test.uploader"
 ```
 
-Then run these commands 
-
+Create local test certificate authority:
 ```shell
 poetry install --sync --with dev
 poetry shell
 gwcert ca create test-ca
+```
+
+Generate test certs for the uploader and the stub ingester:
+```shell
 gwup gen-test-certs
 gwup stubs ingester gen-test-certs
+```
 
-# Open 3 terminals. In each terminal, cd to the gridworks-uploader repo and 
-# run: 
-poetry shell 
+Open 3 terminals. In each terminal, cd to the gridworks-uploader repo and run:
+```shell
+poetry shell
+```
 
-# In the ingester terminal run: 
+In the ingester terminal run:
+```shell
 gwup stubs ingester run --log-events
+```
 
-# In the uploader terminal run: 
+In the uploader terminal run:
+```shell 
 gwup run --message-summary
+```
 
-# In the client terminal run:
+In the client terminal run:
+```shell
 gwup stubs client run 
-# OR
+```
+
+Or:
+```shell
 python src/gwupload/stubs/client/client.py 
 ```
 

@@ -7,7 +7,6 @@ from logging import Logger
 from pathlib import Path
 from typing import Optional, Self
 
-import dotenv
 import rich
 import typer
 from gwproactor import AppSettings
@@ -147,11 +146,12 @@ class UnitFilePaths:
     dst_unit_file: Path
 
     def __init__(
-        self, env_file: str = ".env", settings: Optional[AppSettings] = None
+        self, env_file: str = "", settings: Optional[AppSettings] = None
     ) -> None:
         if settings is None:
-            env_file = dotenv.find_dotenv(filename=env_file)
-            settings = UploaderApp.get_settings(env_file=env_file)
+            settings = UploaderApp.get_settings(
+                env_file=env_file or UploaderApp.default_env_path()
+            )
         self.src_unit_file = Path(settings.paths.config_dir).absolute() / UNIT_NAME
         self.dst_unit_file = Path("/lib/systemd/system") / UNIT_NAME
 
@@ -178,7 +178,7 @@ class UnitFilePaths:
 
 @app.command()
 def file(
-    env_file: str = ".env",
+    env_file: str = "",
 ) -> str:
     """Print services file path"""
     service_file_path = UnitFilePaths(env_file=env_file).src_unit_file
@@ -190,11 +190,11 @@ def file(
 def generate(
     *,
     user: str = DEFAULT_UPLOADER_USER,
-    env_file: str = ".env",
+    env_file: str = "",
     force: bool = False,
 ) -> Path:
     """Create systemd services file for '[bold green]Gridworks Uploader[/bold green]' command."""
-    env_file = dotenv.find_dotenv(filename=env_file)
+    env_file = env_file or str(UploaderApp.default_env_path())
     settings = UploaderApp.get_settings(env_file=env_file)
     service_file_path = UnitFilePaths(settings=settings).src_unit_file
     rich.print()
@@ -253,7 +253,7 @@ def status(*, dry_run: bool = False) -> None:
         command="status",
         args=["--no-pager", "-n", "0"],
         sudo_required=False,
-    ).run(dry_run=dry_run)
+    ).run(dry_run=dry_run, raise_on_error=False)
 
 
 @app.command()
@@ -286,8 +286,9 @@ def log(*, since: str = "-1h", dry_run: bool = False) -> None:
             print(line, end="")  # noqa: T201
 
 
-def _uninstall(*, env_file: str = ".env", dry_run: bool = False) -> None:
+def _uninstall(*, env_file: str = "", dry_run: bool = False) -> None:
     """Uninstall systemd service"""
+    env_file = env_file or str(UploaderApp.default_env_path())
     SystemCtlCommand("stop").run(dry_run=dry_run, raise_on_error=False)
     SystemCtlCommand("disable").run(dry_run=dry_run, raise_on_error=False)
     SystemCtlCommand(command="daemon-reload", unit_name="").run(dry_run=dry_run)
@@ -297,20 +298,24 @@ def _uninstall(*, env_file: str = ".env", dry_run: bool = False) -> None:
 
 
 @app.command()
-def uninstall(*, env_file: str = ".env", dry_run: bool = False) -> None:
+def uninstall(*, env_file: str = "", dry_run: bool = False) -> None:
     """Uninstall the systemd service"""
     _uninstall(env_file=env_file, dry_run=dry_run)
 
 
 @app.command()
-def install(*, env_file: str = ".env", dry_run: bool = False) -> None:
+def install(*, env_file: str = "", dry_run: bool = False) -> None:
     """Install the systemd service"""
+    logger.info("Ensuring a clean environment by uninstalling prior to installing:")
+    env_file = env_file or str(UploaderApp.default_env_path())
     _uninstall(env_file=env_file, dry_run=dry_run)
+    logger.info("Installing:")
     unit_paths = UnitFilePaths(env_file=env_file)
     unit_paths.add_sym_link_command().run(dry_run=dry_run)
     SystemCtlCommand(command="enable", unit_name=str(unit_paths.dst_unit_file)).run(
         dry_run=dry_run
     )
+    logger.info("Starting service:")
     SystemCtlCommand(command="start").run(dry_run=dry_run)
 
 

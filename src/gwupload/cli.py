@@ -1,9 +1,7 @@
-import asyncio
+from pathlib import Path
 
-import dotenv
+import rich
 import typer
-from gwproactor.command_line_utils import run_async_main
-from gwproactor.logging_setup import enable_aiohttp_logging
 from gwproactor_test.certs import generate_dummy_certs
 
 from gwupload import UploaderApp, service_cli
@@ -24,7 +22,7 @@ cli_app.add_typer(
 
 @cli_app.command()
 def run(
-    env_file: str = ".env",
+    env_file: str = "",
     *,
     dry_run: bool = False,
     verbose: bool = False,
@@ -32,32 +30,36 @@ def run(
     aiohttp_verbose: bool = False,
 ) -> None:
     """Run the uploader."""
-    if aiohttp_verbose:
-        enable_aiohttp_logging()
-    asyncio.run(
-        run_async_main(
-            app_type=UploaderApp,
-            env_file=env_file,
-            dry_run=dry_run,
-            verbose=verbose,
-            message_summary=message_summary,
-        )
+    UploaderApp.main(
+        env_file=env_file,
+        dry_run=dry_run,
+        verbose=verbose,
+        message_summary=message_summary,
+        aiohttp_logging=aiohttp_verbose,
     )
 
 
 @cli_app.command()
+def envfile() -> None:
+    """Print the default path to the environment file."""
+    rich.print(UploaderApp.default_env_path())
+
+
+@cli_app.command()
 def config(
-    env_file: str = ".env",
+    env_file: str = "",
 ) -> None:
     """Show uploader configuration"""
     UploaderApp.print_settings(env_file=env_file)
 
 
 @cli_app.command()
-def gen_test_certs(*, dry_run: bool = False, env_file: str = ".env") -> None:
+def gen_test_certs(*, dry_run: bool = False, env_file: str = "") -> None:
     """Generate test certs for the uploader."""
     generate_dummy_certs(
-        UploaderApp(env_file=dotenv.find_dotenv(env_file, usecwd=True)).settings,
+        UploaderApp.get_settings(
+            env_file=UploaderApp.default_env_path() if not env_file else Path(env_file)
+        ),
         dry_run=dry_run,
     )
 
