@@ -1,9 +1,7 @@
-import asyncio
 import logging
+from pathlib import Path
 
-import dotenv
 import typer
-from gwproactor.command_line_utils import run_async_main
 from gwproactor_test.certs import generate_dummy_certs
 
 from gwupload.stubs.ingester.ingester import StubIngesterApp
@@ -19,47 +17,47 @@ app = typer.Typer(
 @app.command()
 def run(
     *,
-    env_file: str = ".env",
+    env_file: str = "",
     dry_run: bool = False,
     verbose: bool = False,
     message_summary: bool = False,
     log_events: bool = False,
 ) -> None:
     """Run the stub ingester"""
-
-    env_file = dotenv.find_dotenv(filename=env_file, usecwd=True)
     app_settings = StubIngesterApp.get_settings(
-        env_file=env_file,
+        env_file=StubIngesterApp.default_env_path() if not env_file else Path(env_file),
     )
     if log_events:
         app_settings.event_logger_level = logging.INFO
-    asyncio.run(
-        run_async_main(
-            app_settings=app_settings,
-            app_type=StubIngesterApp,
-            env_file=env_file,
-            dry_run=dry_run,
-            verbose=verbose,
-            message_summary=message_summary,
-        )
+    StubIngesterApp.main(
+        app_settings=app_settings,
+        dry_run=dry_run,
+        verbose=verbose,
+        message_summary=message_summary,
     )
 
 
 @app.command()
-def gen_test_certs(*, dry_run: bool = False, env_file: str = ".env") -> None:
+def gen_test_certs(*, dry_run: bool = False, env_file: str = "") -> None:
     """Generate test certs for the stub ingester."""
     generate_dummy_certs(
-        StubIngesterApp(env_file=dotenv.find_dotenv(env_file, usecwd=True)).settings,
+        StubIngesterApp(
+            env_file=StubIngesterApp.default_env_path()
+            if not env_file
+            else Path(env_file)
+        ).settings,
         dry_run=dry_run,
     )
 
 
 @app.command()
 def config(
-    env_file: str = ".env",
+    env_file: str = "",
 ) -> None:
     """Show stub ingester configuration"""
-    StubIngesterApp.print_settings(env_file=env_file)
+    StubIngesterApp.print_settings(
+        env_file=StubIngesterApp.default_env_path() if not env_file else Path(env_file)
+    )
 
 
 @app.callback()
