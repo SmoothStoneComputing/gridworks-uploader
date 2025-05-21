@@ -11,7 +11,7 @@ cli_app = typer.Typer(
     no_args_is_help=True,
     pretty_exceptions_enable=False,
     rich_markup_mode="rich",
-    help="GridWorks Uploader",
+    help="Commands for interacting with the Gridworks Uploader",
 )
 
 cli_app.add_typer(stubs_cli.app, name="stubs", help="Use stub applications for testing")
@@ -66,6 +66,10 @@ def gen_test_certs(*, dry_run: bool = False, env_file: str = "") -> None:
 
 @cli_app.callback()
 def _main() -> None: ...
+
+
+# For sphinx:
+typer_click_object = typer.main.get_command(cli_app)
 
 
 if __name__ == "__main__":
