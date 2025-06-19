@@ -22,7 +22,7 @@
 This package provides a reliable upload service using the [gridworks-protocol]. 
 
 The upload services communicates upstream using MQTT. Clients deliver data to
-the service for reliable delivery using http. For [example](./src/gwupload/stubs/client/client.py): 
+the service for reliable delivery using http. For [example]: 
 
 ```python
     import random
@@ -116,21 +116,92 @@ python src/gwupload/stubs/client/client.py
 ```
 
 
-## Features
-
-- TODO
-
-## Requirements
-
-- TODO
-
 ## Installation
 
 You can install _Gridworks Uploader_ via [pip] from [PyPI]:
 
-```console
-$ pip install gridworks-uploader
+```shell
+uv tool install gridworks-uploader
 ```
+or
+```
+pipx install gridworks-uploader
+```
+
+## Service installation
+Gridworks-Uploader can be installed as a [systemd] service,
+for example on a Raspberry Pi, using `gwup service` command line interface. 
+The gwup service commands are mostly wrappers around [systemctl] and [journalctl].
+To see the systemctl and journalctl command without running them simply pass
+`--dry-run` to any gwup service command.
+
+### Unit file generation
+
+The configuration for the service is stored in a [unit file]. To generate a
+service file run:
+
+```shell
+gwup service generate
+```
+or, if the service will not run under default user, 'pi', but the user USER_NAME, 
+run: 
+```shell
+gwup service generate --user USER_NAME
+```
+
+The unit file can be also be written or edited by hand. The service file is
+generated at `$HOME/.config/gridworks/uploader/gridworks-uploader.service`.
+That path can be viewed any time with: 
+```shell
+gwup service file
+```
+
+Once the service is installed changes to the unit file will not take effect
+unless the unit file is reloaded into systemd with `sudo systemctl daemon-reload`
+and the service is restarted. This can be accomplished with: 
+```shell
+gwup service reload
+gwup service restart
+```
+
+### Installation
+To install and run the service run:
+```shell
+gwup service install
+```
+
+To stop and uninstall the service run:
+```shell
+gwup service uninstall
+```
+The service can be re-installed without re-generating the unit file. 
+
+### Starting and stopping
+
+The service can be started, restarted and stopped: 
+```shell
+gwup service start
+```
+```shell
+gwup service restart
+```
+
+```shell
+gwup service stop
+```
+A stopped service will restart when the device reboots. Use `gwup service uninstall`
+to prevent the service from restarting when the device reboots. 
+
+### Watching
+The current state of the service can be seen with:
+```shell
+gwup service status
+```
+The log of the service can be followed with: 
+```shell
+gwup service log
+```
+
 
 ## Usage
 
@@ -160,6 +231,13 @@ This project was generated from [@cjolowicz]'s [Hypermodern Python Cookiecutter]
 [hypermodern python cookiecutter]: https://github.com/cjolowicz/cookiecutter-hypermodern-python
 [file an issue]: https://github.com/SmoothStoneComputing/gridworks-uploader/issues
 [pip]: https://pip.pypa.io/
+[example]: https://github.com/SmoothStoneComputing/gridworks-uploader/blob/dev/src/gwupload/stubs/client/client.py
+[gridworks-protocol]: https://github.com/thegridelectric/gridworks-protocol
+[gridworks-proactor instructions]: https://github.com/SmoothStoneComputing/gridworks-proactor/tree/2.X/has-a?tab=readme-ov-file#requirements
+[systemd]: https://www.man7.org/linux/man-pages/man1/systemd.1.html
+[unit file]: https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html#
+[systemctl]: https://www.man7.org/linux/man-pages/man1/systemctl.1.html
+[journalctl]: https://www.man7.org/linux/man-pages/man1/journalctl.1.html
 
 <!-- github-only -->
 
@@ -168,5 +246,3 @@ This project was generated from [@cjolowicz]'s [Hypermodern Python Cookiecutter]
 [command-line reference]: https://gridworks-uploader.readthedocs.io/en/latest/usage.html
 
 
-[gridworks-protocol]: https://github.com/thegridelectric/gridworks-protocol 
-[gridworks-proactor instructions]: https://github.com/SmoothStoneComputing/gridworks-proactor/tree/2.X/has-a?tab=readme-ov-file#requirements

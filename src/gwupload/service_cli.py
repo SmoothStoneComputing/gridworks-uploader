@@ -193,7 +193,7 @@ def generate(
     env_file: str = "",
     force: bool = False,
 ) -> Path:
-    """Create systemd services file for '[bold green]Gridworks Uploader[/bold green]' command."""
+    """Create systemd services file for the 'gwup run' command."""
     env_file = env_file or str(UploaderApp.default_env_path())
     settings = UploaderApp.get_settings(env_file=env_file)
     service_file_path = UnitFilePaths(settings=settings).src_unit_file

@@ -1,7 +1,7 @@
 # Usage
 
 ```{eval-rst}
-.. click:: gwupload.__main__:main
-    :prog: gridworks-uploader
+.. click:: gwupload.cli:typer_click_object
+    :prog: gwup
     :nested: full
 ```
