@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 
+import rich
 import typer
 from gwproactor_test.certs import generate_dummy_certs
 
@@ -58,6 +59,12 @@ def config(
     StubIngesterApp.print_settings(
         env_file=StubIngesterApp.default_env_path() if not env_file else Path(env_file)
     )
+
+
+@app.command()
+def envfile() -> None:
+    """Print the default path to the environment file."""
+    rich.print(StubIngesterApp.default_env_path())
 
 
 @app.callback()

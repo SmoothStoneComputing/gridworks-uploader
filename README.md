@@ -73,9 +73,19 @@ with these contents:
 ```
 UPLOADER_APP_lONG_NAME = "test.uploader"
 UPLOADER_APP_INGESTER_LONG_NAME = "test.ingester"
+```
+
+Create a second `.env` at the location returned by: 
+```shell
+gwup stubs ingester envfile
+```
+
+with these contents:
+```
 STUB_INGESTER_APP_lONG_NAME = "test.ingester"
 STUB_INGESTER_APP_UPLOADER_LONG_NAME = "test.uploader"
 ```
+
 
 Create local test certificate authority:
 ```shell

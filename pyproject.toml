@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gridworks-uploader"
-version = "1.0.1"
+version = "1.0.2"
 description = "Gridworks Uploader"
 authors = ["Andrew Schweitzer <schweitz72@gmail.com>"]
 license = "MIT"
