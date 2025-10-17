@@ -22,6 +22,7 @@ def test_cli_completes() -> None:
         ["stubs", "ingester", "run", "--dry-run"],
         ["stubs", "ingester", "gen-test-certs", "--dry-run"],
         ["stubs", "ingester", "config"],
+        ["stubs", "ingester", "envfile"],
         ["stubs", "client"],
         ["stubs", "client", "run", "--num-packets", "0"],
         ["service"],
